@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <h1 class="display-4 font-weight-bold">{{ app_name }}</h1>
+                <h2 class="h3 text-muted">{{ title }}</h2>
+                <p class="lead text-secondary">
+                    Topluluğumuza katkıda bulunarak bilgi havuzumuzu genişletmemize yardımcı olun. Eklediğiniz sorular, editör onayından sonra yayınlanacaktır.
+                </p>
+            </div>
+
+            <!-- Kullanıcı Durum Bilgisi Alanı -->
+            <div id="user-status-banner" class="alert alert-info text-center">
+                <p class="font-weight-bold mb-0">Kullanıcı durumu kontrol ediliyor...</p>
+            </div>
+
+            <!-- Bildirim Mesajları Alanı -->
+            <div id="response-message-area" class="mt-3"></div>
+
+            <div class="card shadow-sm border-0 rounded">
+                <div class="card-body p-4 p-md-5">
+                    <form id="question-form">
+                        <div class="form-row">
+                            <!-- Ders ve Alt Konu Seçimi -->
+                            <div class="form-group col-md-6">
+                                <label for="course_select">Ders Seçin</label>
+                                <select id="course_select" name="course_id" class="form-control" required>
+                                    <option value="" disabled selected>Lütfen bir ders seçin...</option>
+                                    {% for course in courses %}
+                                        <option value="{{ course.id }}">{{ course.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="subtopic_select">Alt Konu Seçin</label>
+                                <select id="subtopic_select" name="subtopic_id" class="form-control" required disabled>
+                                    <option value="" disabled selected>Önce ders seçmelisiniz...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Soru Metni -->
+                        <div class="form-group">
+                            <label for="text">Soru Metni</label>
+                            <textarea id="text" name="text" rows="4" class="form-control" placeholder="Soru metnini buraya yazın..." required></textarea>
+                        </div>
+
+                        <!-- Seçenekler -->
+                        <div class="form-row">
+                            <div class="form-group col-md-6"><label for="option_a">A Seçeneği</label><input id="option_a" name="option_a" type="text" class="form-control" required></div>
+                            <div class="form-group col-md-6"><label for="option_b">B Seçeneği</label><input id="option_b" name="option_b" type="text" class="form-control" required></div>
+                            <div class="form-group col-md-6"><label for="option_c">C Seçeneği</label><input id="option_c" name="option_c" type="text" class="form-control" required></div>
+                            <div class="form-group col-md-6"><label for="option_d">D Seçeneği</label><input id="option_d" name="option_d" type="text" class="form-control" required></div>
+                            <div class="form-group col-12"><label for="option_e">E Seçeneği</label><input id="option_e" name="option_e" type="text" class="form-control" required></div>
+                        </div>
+                        
+                        <!-- Doğru Seçenek ve Resim Yükleme -->
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="correct_option">Doğru Seçenek</label>
+                                <select id="correct_option" name="correct_option" class="form-control" required>
+                                    <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="photo">Resim Yükle (Opsiyonel)</label>
+                                <input id="photo" name="photo" type="file" class="form-control-file">
+                            </div>
+                        </div>
+
+                        <!-- Gönder Butonu -->
+                        <button type="submit" id="submit-button" class="btn btn-primary btn-lg btn-block mt-4">Soruyu Onaya Gönder</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <!-- Bootstrap 4.5.2 JS, jQuery ve Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" xintegrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" xintegrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" xintegrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+    <script>
+        const subtopicsByCourse = JSON.parse('{{ subtopics_by_course | tojson | safe }}');
+        const courseSelect = document.getElementById('course_select');
+        const subtopicSelect = document.getElementById('subtopic_select');
+
+        courseSelect.addEventListener('change', (event) => {
+            const courseId = event.target.value;
+            subtopicSelect.innerHTML = '<option value="" disabled selected>Lütfen bir alt konu seçin...</option>';
+            subtopicSelect.disabled = true;
+            if (courseId && subtopicsByCourse[courseId]) {
+                subtopicsByCourse[courseId].forEach(subtopic => {
+                    const option = document.createElement('option');
+                    option.value = subtopic.id;
+                    option.textContent = subtopic.name;
+                    subtopicSelect.appendChild(option);
+                });
+                subtopicSelect.disabled = false;
+            } else {
+                 subtopicSelect.innerHTML = '<option value="" disabled selected>Bu ders için alt konu bulunamadı.</option>';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const userStatusBanner = document.getElementById('user-status-banner');
+            const token = localStorage.getItem('sorugram_token');
+            let user = null;
+            try { user = JSON.parse(localStorage.getItem('sorugram_user')); } catch (e) { console.error("Kullanıcı verisi okunamadı:", e); }
+            
+            if (user && token) {
+                userStatusBanner.className = 'alert alert-success text-center';
+                userStatusBanner.innerHTML = `<p class="font-weight-bold mb-0">Hoş geldin, ${user.username}! Bu soruyu kendi adınıza gönderiyorsunuz.</p>`;
+            } else {
+                userStatusBanner.className = 'alert alert-info text-center';
+                userStatusBanner.innerHTML = `<p class="font-weight-bold mb-0">Giriş yapmadınız. Gönderdiğiniz sorular "mehmetalper04" adına kaydedilecektir.</p>`;
+            }
+
+            const form = document.getElementById('question-form');
+            const submitButton = document.getElementById('submit-button');
+            const messageArea = document.getElementById('response-message-area');
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                submitButton.disabled = true;
+                submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Gönderiliyor...`;
+                messageArea.innerHTML = '';
+
+                const formData = new FormData(form);
+                const apiEndpoint = "{{ url_for('community_bp.submit_question_handler') }}";
+                const headers = {};
+                if (token) { headers['Authorization'] = `Bearer ${token}`; }
+
+                try {
+                    const response = await fetch(apiEndpoint, { method: 'POST', body: formData, headers: headers });
+                    const result = await response.json();
+                    let alertClass = response.ok ? 'alert-success' : 'alert-danger';
+                    messageArea.innerHTML = `<div class="alert ${alertClass} text-center">${result.message || 'Bilinmeyen bir hata oluştu.'}</div>`;
+
+                    if(response.ok) {
+                        form.reset();
+                        subtopicSelect.innerHTML = '<option value="" disabled selected>Önce ders seçmelisiniz...</option>';
+                        subtopicSelect.disabled = true;
+                    }
+                } catch (error) {
+                    console.error("Form gönderme hatası:", error);
+                    messageArea.innerHTML = `<div class="alert alert-danger text-center">Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.</div>`;
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Soruyu Onaya Gönder';
+                }
+            });
+        });
+    </script>
+{% endblock %}

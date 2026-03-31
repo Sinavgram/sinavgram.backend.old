@@ -1,0 +1,133 @@
+{% extends "admin/admin_base_layout.html" %} {# Admin panelinizin ana şablonunu kullanın #}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Sayfa Başlığı -->
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h1 class="h3 mb-0 text-gray-800">{{ title }}</h1>
+        {% if questions_pagination %}
+            <span class="badge badge-primary badge-pill" style="font-size: 1rem;">
+                Toplam {{ questions_pagination.total }} Soru
+            </span>
+        {% endif %}
+    </div>
+
+    <!-- Arama Formu -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('admin_panel_bp.admin_all_questions') }}">
+                <div class="input-group">
+                    <input type="search" name="q" class="form-control" placeholder="Soru metni, ID, link ID, ders veya gönderen adında ara..." value="{{ search_query or '' }}">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search fa-sm"></i> Ara
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sorular Tablosu -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Soru Bankası</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Soru Metni</th>
+                            <th>Ders / Alt Konu</th>
+                            <th>Gönderen</th>
+                            <th class="text-center">Durum</th>
+                            <th>Tarih</th>
+                            <th class="text-center" style="width: 120px;">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if questions_pagination and questions_pagination.items %}
+                            {% for question in questions_pagination.items %}
+                            <tr>
+                                <td>{{ question.id }}</td>
+                                <td>
+                                    <a href="{{ url_for('admin_panel_bp.admin_edit_question', question_id=question.id, source='all') }}" title="{{ question.text }}">
+                                        {{ question.text[:60] }}{% if question.text|length > 60 %}...{% endif %}
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="d-block small">{{ get_course_name_from_subtopic(question.subtopic_id) }}</span>
+                                    <span class="d-block text-muted small">{{ get_subtopic_name(question.subtopic_id) }}</span>
+                                </td>
+                                <td>
+                                    {% if question.submitted_by_user_id %}
+                                        {{ get_user_username(question.submitted_by_user_id) }}
+                                    {% else %}
+                                        <span class="text-muted">Admin/Sistem</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if question.status == 'approved' %}<span class="badge badge-success">Onaylandı</span>
+                                    {% elif question.status == 'pending' %}<span class="badge badge-warning">Bekliyor</span>
+                                    {% elif question.status == 'rejected' %}<span class="badge badge-danger">Reddedildi</span>
+                                    {% elif question.status == 'reported' %}<span class="badge badge-secondary">Raporlandı</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ question.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('admin_panel_bp.admin_edit_question', question_id=question.id, source='all') }}" class="btn btn-sm btn-info" data-toggle="tooltip" title="Düzenle"><i class="fas fa-edit"></i></a>
+                                        <form action="{{ url_for('admin_panel_bp.admin_delete_question', question_id=question.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bu soruyu KALICI olarak silmek istediğinizden emin misiniz?');">
+                                            <button type="submit" class="btn btn-sm btn-danger" data-toggle="tooltip" title="Sil"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    {% if search_query %}
+                                        "{{ search_query }}" araması için sonuç bulunamadı.
+                                    {% else %}
+                                        Gösterilecek soru bulunmamaktadır.
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Sayfalama Kontrolleri -->
+            {% if questions_pagination and questions_pagination.pages > 1 %}
+            <nav aria-label="Sayfalar">
+                <ul class="pagination justify-content-center mt-4">
+                    <li class="page-item {% if not questions_pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin_panel_bp.admin_all_questions', page=questions_pagination.prev_num, q=search_query) }}">Önceki</a>
+                    </li>
+                    {% for page_num in questions_pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                        {% if page_num %}
+                            {% if questions_pagination.page == page_num %}
+                                <li class="page-item active" aria-current="page"><span class="page-link">{{ page_num }}</span></li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="{{ url_for('admin_panel_bp.admin_all_questions', page=page_num, q=search_query) }}">{{ page_num }}</a></li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">…</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {% if not questions_pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin_panel_bp.admin_all_questions', page=questions_pagination.next_num, q=search_query) }}">Sonraki</a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

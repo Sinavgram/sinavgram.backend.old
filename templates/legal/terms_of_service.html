@@ -1,0 +1,66 @@
+{% extends "base.html" %} {# Uygulamanızın ana şablonunu (base.html veya layout.html) kullanın #}
+
+{% block title %}{{ title }} - {{ app_name }}{% endblock %}
+
+{% block head_extra %}
+<style>
+    .legal-content h2 {
+        font-size: 1.5rem; /* 24px */
+        font-weight: 600;
+        margin-top: 2rem; /* 32px */
+        margin-bottom: 1rem; /* 16px */
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 0.5rem; /* 8px */
+    }
+    .legal-content p {
+        margin-bottom: 1rem; /* 16px */
+        line-height: 1.75;
+    }
+    .legal-content ul {
+        list-style-type: disc;
+        margin-left: 1.5rem; /* 24px */
+        margin-bottom: 1rem; /* 16px */
+    }
+    .legal-content li {
+        margin-bottom: 0.5rem; /* 8px */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-12 max-w-4xl">
+    <div class="bg-white p-8 rounded-lg shadow-md">
+        <h1 class="text-3xl font-bold text-gray-900 mb-6 text-center">{{ title }}</h1>
+
+        <div class="legal-content text-gray-700">
+            <p><strong>Son Güncelleme:</strong> 8 Haziran 2025</p>
+
+            <p>Lütfen {{ app_name }} uygulamasını kullanmadan önce bu kullanım şartlarını dikkatlice okuyun. Uygulamaya erişiminiz ve kullanımınız, bu şartları kabul etmenize ve bunlara uymanıza bağlıdır.</p>
+
+            <h2>1. Hesaplar</h2>
+            <p>Uygulamamızda bir hesap oluşturduğunuzda, bize doğru, eksiksiz ve güncel bilgiler sağlamalısınız. Bunu yapmamanız, Şartların ihlali anlamına gelir ve hesabınızın derhal feshedilmesine neden olabilir. Hesap şifrenizin güvenliğinden siz sorumlusunuz.</p>
+
+            <h2>2. Kullanıcı İçerikleri</h2>
+            <p>Uygulamaya gönderdiğiniz sorular, metinler, resimler ve diğer içerikler ("Kullanıcı İçeriği") tamamen sizin sorumluluğunuzdadır. Kullanıcı İçeriği göndererek, bu içeriğin telif hakkı, ahlaki değerler ve diğer yasalara uygun olduğunu beyan ve garanti edersiniz. Aşağıdaki türde içeriklerin gönderilmesi yasaktır:</p>
+            <ul>
+                <li>Yasa dışı, müstehcen, hakaret içeren, tehditkar veya nefret söylemi barındıran içerikler.</li>
+                <li>Başkalarının fikri mülkiyet haklarını ihlal eden içerikler.</li>
+                <li>Virüs veya diğer kötü amaçlı yazılımları içeren materyaller.</li>
+            </ul>
+            <p>Kurallarımıza uymayan içerikleri kaldırma ve ilgili hesapları askıya alma veya sonlandırma hakkımızı saklı tutarız.</p>
+
+            <h2>3. Fikri Mülkiyet</h2>
+            <p>Uygulama ve orijinal içeriği (Kullanıcı İçerikleri hariç), özellikleri ve işlevselliği {{ app_name }} ve lisans verenlerinin münhasır mülkiyetindedir ve öyle kalacaktır.</p>
+
+            <h2>4. Sorumluluğun Sınırlandırılması</h2>
+            <p>Uygulamanın kullanımından kaynaklanan herhangi bir dolaylı, arızi, özel, sonuç olarak ortaya çıkan veya cezai zararlardan, kâr, veri veya diğer maddi olmayan kayıplardan {{ app_name }} sorumlu tutulamaz.</p>
+            
+            <h2>5. Değişiklikler</h2>
+            <p>Kendi takdirimize bağlı olarak, bu Şartları herhangi bir zamanda değiştirme veya yenileme hakkımızı saklı tutarız. Bu sayfayı periyodik olarak gözden geçirmek sizin sorumluluğunuzdadır.</p>
+
+            <h2>6. İletişim</h2>
+            <p>Bu Kullanım Şartları hakkında sorularınız varsa, lütfen bizimle <a href="mailto:{{ config.MAIL_USERNAME }}" class="text-indigo-600 hover:underline">{{ config.MAIL_USERNAME }}</a> adresi üzerinden iletişime geçin.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

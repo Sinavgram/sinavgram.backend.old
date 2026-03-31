@@ -1,0 +1,124 @@
+{% extends "admin/admin_base_layout.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h1 class="h3 mb-0 text-gray-800">{{ title }}</h1>
+        {% if reports_pagination %}
+            <span class="badge bg-danger rounded-pill fs-6">
+                Toplam {{ reports_pagination.total }} Rapor
+            </span>
+        {% endif %}
+    </div>
+
+    <!-- Arama Formu -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('admin_panel_bp.admin_reported_questions') }}">
+                <div class="input-group">
+                    <input type="search" name="q" class="form-control" placeholder="Soru metni, rapor nedeni veya raporlayan adında ara..." value="{{ search_query or '' }}">
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="fas fa-search"></i> Ara
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Raporlanan Sorular Listesi</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Rapor ID</th>
+                            <th>Soru ID</th>
+                            <th>Soru Metni</th>
+                            <th>Raporlayan</th>
+                            <th>Rapor Nedeni</th>
+                            <th>Tarih</th>
+                            <th class="text-center" style="width: 150px;">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if reports_pagination and reports_pagination.items %}
+                            {% for report in reports_pagination.items %}
+                            <tr>
+                                <td>{{ report.id }}</td>
+                                <td>{{ report.question.id }}</td>
+                                <td>
+                                    <a href="{{ url_for('admin_panel_bp.admin_edit_question', question_id=report.question.id, source='reported') }}" title="Soruyu Görüntüle/Düzenle">
+                                        {{ report.question.text[:60] }}{% if report.question.text|length > 60 %}...{% endif %}
+                                    </a>
+                                </td>
+                                <td>{{ get_user_username(report.reported_by_user_id) }}</td>
+                                <td>
+                                    <span title="{{ report.reason }}">{{ report.reason[:50] if report.reason else '-' }}{% if report.reason and report.reason|length > 50 %}...{% endif %}</span>
+                                </td>
+                                <td>{{ report.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('admin_panel_bp.admin_edit_question', question_id=report.question.id, source='reported') }}" class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="Düzenle"><i class="fas fa-edit"></i></a>
+                                        <form action="{{ url_for('admin_panel_bp.admin_approve_question', question_id=report.question.id) }}" method="POST" class="d-inline">
+                                            <input type="hidden" name="source" value="reported">
+                                            <button type="submit" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Soruyu Onayla"><i class="fas fa-check"></i></button>
+                                        </form>
+                                        <form action="{{ url_for('admin_panel_bp.admin_dismiss_report', report_id=report.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bu raporu kapatmak istediğinizden emin misiniz? (Soru onaylı kalır)');">
+                                            <button type="submit" class="btn btn-sm btn-secondary" data-bs-toggle="tooltip" title="Raporu Kapat"><i class="fas fa-eye-slash"></i></button>
+                                        </form>
+                                        <form action="{{ url_for('admin_panel_bp.admin_delete_question', question_id=report.question.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bu soruyu ve ilişkili tüm raporları KALICI olarak silmek istediğinizden emin misiniz?');">
+                                            <button type="submit" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Soruyu Sil"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    {% if search_query %}
+                                        "{{ search_query }}" araması için sonuç bulunamadı.
+                                    {% else %}
+                                        Yeni raporlanmış soru bulunmamaktadır.
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Sayfalama Navigasyonu -->
+            {% if reports_pagination and reports_pagination.pages > 1 %}
+            <nav aria-label="Sayfalar">
+                <ul class="pagination justify-content-center mt-4">
+                    <li class="page-item {% if not reports_pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin_panel_bp.admin_reported_questions', page=reports_pagination.prev_num, q=search_query) }}">Önceki</a>
+                    </li>
+                    {% for page_num in reports_pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                        {% if page_num %}
+                            {% if reports_pagination.page == page_num %}
+                                <li class="page-item active" aria-current="page"><span class="page-link">{{ page_num }}</span></li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="{{ url_for('admin_panel_bp.admin_reported_questions', page=page_num, q=search_query) }}">{{ page_num }}</a></li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">…</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {% if not reports_pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin_panel_bp.admin_reported_questions', page=reports_pagination.next_num, q=search_query) }}">Sonraki</a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

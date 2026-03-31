@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Kayıt Ol - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="text-center mb-4">Hesap Oluştur</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="username">Kullanıcı Adı</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">E-posta Adresi</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Şifre (en az 6 karakter)</label>
+                        <input type="password" class="form-control" id="password" name="password" minlength="6" required>
+                    </div>
+
+                    <!-- Yasal Metinler Onayı (Zorunlu) -->
+                    <div class="form-group form-check mt-3">
+                        <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
+                        <label class="form-check-label small" for="terms">
+                            <a href="{{ url_for('legal_bp.terms_of_service_page') }}" target="_blank">Kullanım Şartları</a>'nı ve 
+                            <a href="{{ url_for('legal_bp.privacy_policy_page') }}" target="_blank">Gizlilik Sözleşmesi</a>'ni okudum ve kabul ediyorum.
+                        </label>
+                    </div>
+
+                    <!-- Bülten Aboneliği (İsteğe Bağlı) -->
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="subscribe" name="subscribe">
+                        <label class="form-check-label small" for="subscribe">
+                            Kampanya ve duyurulardan haberdar olmak için e-posta bültenine abone olmak istiyorum.
+                        </label>
+                    </div>
+                    
+                    <button type="submit" id="submit-button" class="btn btn-success btn-block mt-4">Kayıt Ol</button>
+                    <div id="registerMessage" class="mt-3"></div>
+                </form>
+                <p class="mt-3 text-center">
+                    Zaten hesabınız var mı? <a href="{{ url_for('main_bp.login_page') }}">Giriş Yapın</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const subscribe = document.getElementById('subscribe').checked;
+    
+    const messageDiv = document.getElementById('registerMessage');
+    const submitButton = document.getElementById('submit-button');
+
+    messageDiv.innerHTML = '';
+    submitButton.disabled = true;
+    submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Kaydediliyor...`;
+
+    try {
+        const response = await fetch("{{ url_for('auth_bp.register_user_api', _external=True) }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, password })
+        });
+        const data = await response.json();
+
+        if (response.ok) { // Status 200-299 arası ise
+            messageDiv.innerHTML = `<div class="alert alert-success">${data.message} Giriş sayfasına yönlendiriliyorsunuz...</div>`;
+            
+            // Eğer kullanıcı bültene abone olmayı seçtiyse, arka planda o isteği de gönder.
+            if (subscribe) {
+                try {
+                    await fetch("{{ url_for('community_bp.add_email_to_list') }}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email })
+                    });
+                } catch (subscribeError) {
+                    console.error('Bülten abonelik hatası:', subscribeError);
+                }
+            }
+
+            setTimeout(() => {
+                window.location.href = "{{ url_for('main_bp.login_page') }}";
+            }, 3000);
+        } else {
+            messageDiv.innerHTML = `<div class="alert alert-danger">${data.message || 'Kayıt başarısız.'}</div>`;
+            submitButton.disabled = false;
+            submitButton.textContent = 'Kayıt Ol';
+        }
+    } catch (error) {
+        messageDiv.innerHTML = '<div class="alert alert-danger">Bir ağ hatası oluştu. Lütfen tekrar deneyin.</div>';
+        submitButton.disabled = false;
+        submitButton.textContent = 'Kayıt Ol';
+        console.error('Kayıt hatası:', error);
+    }
+});
+</script>
+{% endblock %}

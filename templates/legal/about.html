@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold">{{ app_name }}</h1>
+                <p class="lead text-muted">Öğrenme ve başarma yolculuğunuzdaki en büyük destekçiniz.</p>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="h3 fw-bold mb-3">Misyonumuz</h2>
+                    <p class="text-secondary">
+                        {{ app_name }} olarak misyonumuz, her seviyeden öğrencinin sınavlara hazırlık sürecini daha verimli, etkileşimli ve erişilebilir hale getirmektir. Kaliteli ve çeşitli soru bankamızla, öğrencilerin eksiklerini tespit etmelerine, kendilerini geliştirmelerine ve hedeflerine ulaşmalarına yardımcı olmayı amaçlıyoruz.
+                    </p>
+                    <hr class="my-4">
+                    <h2 class="h3 fw-bold mb-3">Vizyonumuz</h2>
+                    <p class="text-secondary">
+                        Türkiye'nin en kapsamlı ve en çok tercih edilen dijital soru bankası platformu olmak. Teknolojiyi eğitimin hizmetine sunarak, öğrenmeyi bir görev olmaktan çıkarıp, keşif dolu bir yolculuğa dönüştürmek ve her öğrencinin potansiyelini en üst düzeye çıkarmasını sağlamak en büyük hedefimizdir.
+                    </p>
+                     <hr class="my-4">
+                    <h2 class="h3 fw-bold mb-3">Topluluğumuz</h2>
+                    <p class="text-secondary">
+                        Biz, sadece bir soru bankası değil, aynı zamanda öğrenen ve öğretenlerden oluşan büyük bir aileyiz. Kullanıcılarımızın katkılarıyla sürekli büyüyen ve zenginleşen platformumuz, bilgi paylaşımını ve yardımlaşmayı teşvik eder. Siz de bir soru ekleyerek bu topluluğun bir parçası olabilirsiniz!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

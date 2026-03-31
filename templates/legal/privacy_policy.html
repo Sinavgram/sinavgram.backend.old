@@ -1,0 +1,81 @@
+{% extends "base.html" %} {# Uygulamanızın ana şablonunu (base.html veya layout.html) kullanın #}
+
+{% block title %}{{ title }} - {{ app_name }}{% endblock %}
+
+{% block head_extra %}
+<style>
+    .legal-content h2 {
+        font-size: 1.5rem; /* 24px */
+        font-weight: 600;
+        margin-top: 2rem; /* 32px */
+        margin-bottom: 1rem; /* 16px */
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 0.5rem; /* 8px */
+    }
+    .legal-content h3 {
+        font-size: 1.25rem; /* 20px */
+        font-weight: 600;
+        margin-top: 1.5rem; /* 24px */
+        margin-bottom: 0.75rem; /* 12px */
+    }
+    .legal-content p {
+        margin-bottom: 1rem; /* 16px */
+        line-height: 1.75;
+    }
+    .legal-content ul {
+        list-style-type: disc;
+        margin-left: 1.5rem; /* 24px */
+        margin-bottom: 1rem; /* 16px */
+    }
+    .legal-content li {
+        margin-bottom: 0.5rem; /* 8px */
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="container mx-auto px-4 py-12 max-w-4xl">
+    <div class="bg-white p-8 rounded-lg shadow-md">
+        <h1 class="text-3xl font-bold text-gray-900 mb-6 text-center">{{ title }}</h1>
+        
+        <div class="legal-content text-gray-700">
+            <p><strong>Son Güncelleme:</strong> 8 Haziran 2025</p>
+
+            <p>Bu gizlilik sözleşmesi, {{ app_name }} tarafından toplanan, kullanılan ve paylaşılan kişisel bilgilerinizi nasıl işlediğimizi açıklamaktadır. Uygulamayı kullanarak bu sözleşmeyi kabul etmiş sayılırsınız.</p>
+
+            <h2>1. Topladığımız Bilgiler</h2>
+            <p>Uygulamamız aracılığıyla aşağıdaki türde bilgileri toplayabiliriz:</p>
+            <ul>
+                <li><strong>Kayıt Bilgileri:</strong> Kullanıcı adı, e-posta adresi ve şifre gibi hesap oluştururken sağladığınız bilgiler.</li>
+                <li><strong>Kullanıcı İçerikleri:</strong> Uygulamaya gönderdiğiniz sorular, cevaplar ve diğer katkılar.</li>
+            </ul>
+
+            <h2>2. Bilgilerin Kullanımı</h2>
+            <p>Topladığımız bilgileri aşağıdaki amaçlarla kullanırız:</p>
+            <ul>
+                <li>Hizmetlerimizi sunmak, yönetmek ve geliştirmek.</li>
+                <li>Hesabınızı yönetmek ve size destek sağlamak.</li>
+                <li>Uygulama içi deneyiminizi kişiselleştirmek.</li>
+                <li>Size güncellemeler, güvenlik uyarıları ve bültenler göndermek.</li>
+                <li>Yasal yükümlülüklerimizi yerine getirmek ve dolandırıcılığı önlemek.</li>
+            </ul>
+
+            <h2>3. Bilgilerin Paylaşımı</h2>
+            <p>Kişisel bilgilerinizi, yasal bir zorunluluk olmadıkça veya sizin izniniz olmadan üçüncü taraflarla paylaşmayız. Ancak, hizmetlerimizi sağlamak için çalıştığımız servis sağlayıcılar (örneğin, sunucu barındırma, e-posta gönderimi) bilgilerinize sınırlı erişime sahip olabilir.</p>
+
+            <h2>4. Çerezler ve Takip Teknolojileri</h2>
+            <p>Uygulamamız, kullanıcı deneyimini iyileştirmek için çerezler ve benzeri takip teknolojileri kullanabilir. Bu teknolojiler, tercihlerinizi hatırlamamıza ve kullanım alışkanlıklarınızı analiz etmemize yardımcı olur.</p>
+
+            <h2>5. Veri Güvenliği</h2>
+            <p>Bilgilerinizin güvenliğini sağlamak için makul teknik ve idari önlemler alıyoruz. Ancak, internet üzerinden hiçbir veri aktarım yönteminin %100 güvenli olmadığını unutmamanız gerekir.</p>
+
+            <h2>6. Gizlilik Sözleşmesindeki Değişiklikler</h2>
+            <p>Bu gizlilik sözleşmesini zaman zaman güncelleyebiliriz. Değişiklikler bu sayfada yayınlandığı andan itibaren geçerli olacaktır. Önemli değişiklikler hakkında sizi bilgilendireceğiz.</p>
+
+            <h2>7. İletişim</h2>
+            <p>Gizlilik politikamız hakkında sorularınız varsa, lütfen bizimle <a href="mailto:{{ config.MAIL_USERNAME }}" class="text-indigo-600 hover:underline">{{ config.MAIL_USERNAME }}</a> adresi üzerinden iletişime geçin.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

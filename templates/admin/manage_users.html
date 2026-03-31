@@ -1,0 +1,130 @@
+{% extends "admin/admin_base_layout.html" %}
+
+{% block title %}{{ title }} - Admin Paneli{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h1 class="h3 mb-0 text-gray-800">{{ title }}</h1>
+        {% if admin_user and admin_user.username == 'mehmetalper04' %}
+        <a href="{{ url_for('admin_panel_bp.admin_add_new_admin_user') }}" class="btn btn-success btn-icon-split">
+            <span class="icon text-white-50"><i class="fas fa-user-plus"></i></span>
+            <span class="text">Yeni Admin Ekle</span>
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Arama Formu -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('admin_panel_bp.admin_manage_users') }}">
+                <div class="input-group">
+                    <input type="search" name="q" class="form-control" placeholder="Kullanıcı adı veya e-postada ara..." value="{{ search_query or '' }}">
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="fas fa-search"></i> Ara
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Tüm Kullanıcılar</h6>
+            {% if pagination %}
+                <span class="badge bg-primary rounded-pill">Toplam {{ pagination.total }} Kayıt</span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="usersTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Kullanıcı Adı</th>
+                            <th>E-posta</th>
+                            <th>Admin?</th>
+                            <th>Doğrulanmış?</th>
+                            <th>Aktif?</th>
+                            <th>Kayıt Tarihi</th>
+                            <th style="width: 150px;">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user_item in users_list %}
+                        <tr class="{% if not user_item.is_active %}table-secondary text-muted{% elif user_item.id == admin_user.id %}table-info{% endif %}">
+                            <td>{{ user_item.id }}</td>
+                            <td>{{ user_item.username | escape }}</td>
+                            <td>{{ user_item.email | escape }}</td>
+                            <td>{% if user_item.is_admin %}<span class="badge bg-primary">Evet</span>{% else %}<span class="badge bg-secondary">Hayır</span>{% endif %}</td>
+                            <td>{% if user_item.email_verified %}<span class="badge bg-info text-dark">Evet</span>{% else %}<span class="badge bg-warning text-dark">Hayır</span>{% endif %}</td>
+                            <td>{% if user_item.is_active %}<span class="badge bg-success">Evet</span>{% else %}<span class="badge bg-danger">Hayır</span>{% endif %}</td>
+                            <td>{{ user_item.created_at.strftime('%Y-%m-%d %H:%M') if user_item.created_at else '-' }}</td>
+                            <td>
+                                {% if admin_user and admin_user.username == 'mehmetalper04' %}
+                                    {% if user_item.username == 'mehmetalper04' %}
+                                        <span class="text-muted fst-italic">(Ana Admin)</span>
+                                    {% elif user_item.id == admin_user.id %}
+                                        <span class="text-muted fst-italic">(Kendiniz)</span>
+                                    {% else %}
+                                        <form method="POST" action="{{ url_for('admin_panel_bp.admin_toggle_user_status', user_to_toggle_id=user_item.id) }}" style="display:inline;" onsubmit="return confirm('Kullanıcı: ' + {{ user_item.username | tojson | safe }} + '\nBu kullanıcının aktiflik durumunu değiştirmek istediğinizden emin misiniz?');">
+                                            {% if user_item.is_active %}
+                                                <button type="submit" class="btn btn-warning btn-sm" title="Kullanıcıyı Devre Dışı Bırak"><i class="fas fa-user-slash"></i></button>
+                                            {% else %}
+                                                <button type="submit" class="btn btn-info btn-sm" title="Kullanıcıyı Aktifleştir"><i class="fas fa-user-check"></i></button>
+                                            {% endif %}
+                                        </form>
+                                    {% endif %}
+                                {% elif user_item.id == admin_user.id %}
+                                    <span class="text-muted fst-italic">(Kendiniz)</span>
+                                {% elif user_item.username == 'mehmetalper04' %}
+                                    <span class="text-muted fst-italic">(Ana Admin)</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center">
+                                {% if search_query %}
+                                    "{{ search_query }}" araması için sonuç bulunamadı.
+                                {% else %}
+                                    Kayıtlı kullanıcı bulunamadı.
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Sayfalama (Pagination) -->
+            {% if pagination and pagination.pages > 1 %}
+            <nav aria-label="Kullanıcı Sayfaları">
+                <ul class="pagination justify-content-center mt-4">
+                    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin_panel_bp.admin_manage_users', page=pagination.prev_num, q=search_query) }}">Önceki</a>
+                    </li>
+                    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                        {% if page_num %}
+                            {% if pagination.page == page_num %}
+                                <li class="page-item active" aria-current="page"><span class="page-link">{{ page_num }}</span></li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="{{ url_for('admin_panel_bp.admin_manage_users', page=page_num, q=search_query) }}">{{ page_num }}</a></li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">…</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin_panel_bp.admin_manage_users', page=pagination.next_num, q=search_query) }}">Sonraki</a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Hoş Geldiniz - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4"><strong>{{ app_name }}</strong>'a Hoş Geldiniz!</h1>
+    <p class="lead">Binlerce soru ile bilginizi sınayın, öğrenin ve puan kazanın.</p>
+    <hr class="my-4">
+    <p>Hemen başlayın, derslerdeki başarınızı artırın ve liderlik tablosunda yerinizi alın.</p>
+    <a class="btn btn-primary btn-lg mr-2" href="{{ url_for('main_bp.register_page') }}" role="button">Hemen Kayıt Ol</a>
+    <a class="btn btn-secondary btn-lg" href="{{ url_for('main_bp.login_page') }}" role="button">Giriş Yap</a>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h2>Çeşitli Dersler</h2>
+        <p>Matematik, Türkçe, Fen Bilimleri ve daha birçok dersten binlerce soru.</p>
+    </div>
+    <div class="col-md-4">
+        <h2>Puan Sistemi</h2>
+        <p>Doğru cevaplarla puan kazanın, yanlış cevaplarla tecrübe edinin.</p>
+    </div>
+    <div class="col-md-4">
+        <h2>Konu Özetleri</h2>
+        <p>PDF konu özetleri ile tekrar yapın.</p>
+    </div>
+</div>
+<div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+  <!-- Google Play -->
+  <a href="https://play.google.com/store/apps/details?id=com.mehmetalper04.sinavgram" target="_blank">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+         alt="Get it on Google Play"
+         style="height: 60px;" />
+  </a>
+
+  <!-- App Store -->
+  <a href="https://apps.apple.com/app/id6747351658" target="_blank">
+    <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+         alt="Download on the App Store"
+         style="height: 60px;" />
+  </a>
+</div>
+{% endblock %}

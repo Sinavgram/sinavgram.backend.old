@@ -1,0 +1,112 @@
+{% extends "admin/admin_base_layout.html" %} {# Admin panelinizin ana şablonunu kullanın #}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h1 class="h2 fw-bold mb-4">{{ title }}</h1>
+
+            <!-- Flash mesajları için alan -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row g-3">
+                            <!-- Soru Metni -->
+                            <div class="col-12">
+                                <label for="text" class="form-label">Soru Metni</label>
+                                <textarea id="text" name="text" rows="5" class="form-control" required>{{ question.text }}</textarea>
+                            </div>
+
+                            <!-- Ders ve Alt Konu Seçimi -->
+                            <div class="col-md-6">
+                                <label for="subtopic_select" class="form-label">Ders / Alt Konu</label>
+                                <select id="subtopic_select" name="subtopic_id" class="form-select" required>
+                                    <option disabled>Lütfen seçin...</option>
+                                    {% for course in courses %}
+                                        <optgroup label="{{ course.name }}">
+                                            {% for subtopic in course.subtopics %}
+                                                <option value="{{ subtopic.id }}" {% if subtopic.id == question.subtopic_id %}selected{% endif %}>
+                                                    {{ subtopic.name }}
+                                                </option>
+                                            {% endfor %}
+                                        </optgroup>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Soru Durumu -->
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">Soru Durumu</label>
+                                <select id="status" name="status" class="form-select" required>
+                                    <option value="pending" {% if question.status == 'pending' %}selected{% endif %}>Onay Bekliyor</option>
+                                    <option value="approved" {% if question.status == 'approved' %}selected{% endif %}>Onaylandı</option>
+                                    <option value="rejected" {% if question.status == 'rejected' %}selected{% endif %}>Reddedildi</option>
+                                    <option value="reported" {% if question.status == 'reported' %}selected{% endif %}>Raporlandı</option>
+                                </select>
+                            </div>
+
+                            <!-- Seçenekler -->
+                            <div class="col-md-6"><label for="option_a" class="form-label">A Seçeneği</label><input id="option_a" name="option_a" type="text" class="form-control" value="{{ question.option_a }}" required></div>
+                            <div class="col-md-6"><label for="option_b" class="form-label">B Seçeneği</label><input id="option_b" name="option_b" type="text" class="form-control" value="{{ question.option_b }}" required></div>
+                            <div class="col-md-6"><label for="option_c" class="form-label">C Seçeneği</label><input id="option_c" name="option_c" type="text" class="form-control" value="{{ question.option_c }}" required></div>
+                            <div class="col-md-6"><label for="option_d" class="form-label">D Seçeneği</label><input id="option_d" name="option_d" type="text" class="form-control" value="{{ question.option_d }}" required></div>
+                            <div class="col-md-6"><label for="option_e" class="form-label">E Seçeneği</label><input id="option_e" name="option_e" type="text" class="form-control" value="{{ question.option_e }}" required></div>
+
+                            <!-- Doğru Seçenek -->
+                            <div class="col-md-6">
+                                <label for="correct_option" class="form-label">Doğru Seçenek</label>
+                                <select id="correct_option" name="correct_option" class="form-select" required>
+                                    <option value="A" {% if question.correct_option == 'A' %}selected{% endif %}>A</option>
+                                    <option value="B" {% if question.correct_option == 'B' %}selected{% endif %}>B</option>
+                                    <option value="C" {% if question.correct_option == 'C' %}selected{% endif %}>C</option>
+                                    <option value="D" {% if question.correct_option == 'D' %}selected{% endif %}>D</option>
+                                    <option value="E" {% if question.correct_option == 'E' %}selected{% endif %}>E</option>
+                                </select>
+                            </div>
+
+                            <!-- Mevcut Resim ve Yönetimi -->
+                            <div class="col-12">
+                                <label class="form-label">Soru Resmi</label>
+                                {% if question.image_filename %}
+                                    <div class="mb-2">
+                                        <img src="{{ url_for('main_bp.uploaded_file_route', filename=question.image_filename) }}" alt="Soru Resmi" class="img-fluid rounded" style="max-height: 200px;">
+                                        <div class="form-check mt-2">
+                                            <input class="form-check-input" type="checkbox" name="remove_image" id="remove_image">
+                                            <label class="form-check-label" for="remove_image">
+                                                Mevcut resmi kaldır
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted small">Bu soru için bir resim yüklenmemiş.</p>
+                                {% endif %}
+                                <input id="image" name="image" type="file" class="form-control">
+                                <div class="form-text">Yeni bir resim yüklerseniz, mevcut olanla değiştirilecektir.</div>
+                            </div>
+
+                            <!-- Kaydet Butonu -->
+                            <div class="col-12 text-end mt-4">
+                                <a href="{{ request.referrer or url_for('admin_panel_bp.admin_dashboard') }}" class="btn btn-secondary me-2">İptal</a>
+                                <button type="submit" class="btn btn-primary px-4">Değişiklikleri Kaydet</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

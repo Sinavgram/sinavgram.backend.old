@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold">{{ title }}</h1>
+                <p class="lead text-muted">E-posta bültenimizden ayrılmak istediğiniz için üzgünüz.</p>
+            </div>
+
+            <!-- Flash mesajları için alan -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category in ['success', 'danger', 'warning', 'info'] else 'secondary' }} text-center" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" action="{{ url_for('community_bp.unsubscribe_page') }}">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Bültenden kaldırmak istediğiniz e-posta adresinizi girin:</label>
+                            <input type="email" class="form-control" id="email" name="email" required placeholder="ornek@eposta.com">
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-danger">Abonelikten Çık</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
