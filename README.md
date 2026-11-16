@@ -253,7 +253,7 @@ No license has been specified for this repository. Please contact the repository
 
 GitHub: [@mehmetalper04](https://github.com/mehmetalper04)
 
-Repository: [sinavgram.backend.old](https://github.com/mehmetalper04/sinavgram.backend.old)
+Repository: [sinavgram.backend.old](https://github.com/sinavgram/sinavgram.backend.old)
 
 ---
 
